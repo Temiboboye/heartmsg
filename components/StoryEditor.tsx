@@ -356,7 +356,7 @@ export default function StoryEditor() {
                         </div>
                         {/* Text Content Area - contenteditable for iOS compat */}
                         <div
-                            className="w-full relative px-4 py-8 -my-8 text-center z-[100] pointer-events-auto min-h-[200px] cursor-text flex flex-col items-center justify-start"
+                            className="w-full relative px-4 pt-4 pb-32 text-center z-[100] pointer-events-auto min-h-[250px] cursor-text flex flex-col items-center justify-start"
                             onClick={(e) => { e.stopPropagation(); textEditorRef.current?.focus(); }}
                             onTouchEnd={(e) => { e.stopPropagation(); textEditorRef.current?.focus(); }}
                         >
@@ -376,7 +376,7 @@ export default function StoryEditor() {
                             />
 
                             {/* Progressive Character Limit Bar */}
-                            <div className="mt-6 flex flex-col items-center gap-2">
+                            <div className="mt-8 flex flex-col items-center gap-2 pointer-events-none">
                                 <div className="w-48 h-[2px] bg-black/5 rounded-full overflow-hidden">
                                     <motion.div
                                         initial={{ width: 0 }}
