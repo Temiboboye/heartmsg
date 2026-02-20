@@ -59,19 +59,15 @@ export default function StoryEditor() {
     const currentFontOption = FONTS.find(f => f.id === currentFont) || FONTS[0];
     const currentSlide = slides[currentSlideIndex];
 
+    // Audio cleanup on unmount
     useEffect(() => {
-        if (currentMusic && isPlayingPreview) {
-            audioRef.current = new Audio(currentMusic.src);
-            audioRef.current.play().catch(e => console.error("Audio play failed", e));
-            audioRef.current.onended = () => setIsPlayingPreview(false);
-        } else {
-            audioRef.current?.pause();
-            audioRef.current = null;
-        }
         return () => {
-            audioRef.current?.pause();
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
         };
-    }, [currentMusic, isPlayingPreview]);
+    }, []);
 
     const handlePublishClick = () => {
         setShowCheckoutModal(true);
@@ -444,10 +440,22 @@ export default function StoryEditor() {
                                             onClick={() => {
                                                 if (currentMusic?.id === track.id) {
                                                     // Toggle play/pause preview
-                                                    setIsPlayingPreview(!isPlayingPreview);
+                                                    if (isPlayingPreview) {
+                                                        setIsPlayingPreview(false);
+                                                        audioRef.current?.pause();
+                                                    } else {
+                                                        setIsPlayingPreview(true);
+                                                        audioRef.current?.play().catch(e => console.error("Audio play failed", e));
+                                                    }
                                                 } else {
+                                                    audioRef.current?.pause();
                                                     setCurrentMusic(track);
                                                     setIsPlayingPreview(true);
+
+                                                    const newAudio = new Audio(track.src);
+                                                    audioRef.current = newAudio;
+                                                    newAudio.play().catch(e => console.error("Audio play failed", e));
+                                                    newAudio.onended = () => setIsPlayingPreview(false);
                                                 }
                                             }}
                                             className={cn(
@@ -463,7 +471,11 @@ export default function StoryEditor() {
                                         </button>
                                     ))}
                                     {currentMusic && (
-                                        <button onClick={() => { setCurrentMusic(null); setIsPlayingPreview(false); }} className={cn("mt-1 text-xs opacity-50 hover:opacity-100 py-1", currentTheme.textColor)}>
+                                        <button onClick={() => {
+                                            audioRef.current?.pause();
+                                            setCurrentMusic(null);
+                                            setIsPlayingPreview(false);
+                                        }} className={cn("mt-1 text-xs opacity-50 hover:opacity-100 py-1", currentTheme.textColor)}>
                                             Remove Music
                                         </button>
                                     )}

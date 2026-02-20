@@ -113,14 +113,16 @@ function ClaimInboxForm() {
 
   return (
     <form onSubmit={handleClaim} className="flex flex-col gap-2 w-full">
-      <div className="relative flex items-center">
-        <span className="absolute left-4 text-stone-400 font-medium">ourlovenotes.com/</span>
+      <div className="flex items-center w-full rounded-full border-2 bg-white border-stone-200 focus-within:border-rose-500 focus-within:ring-4 focus-within:ring-rose-500/10 transition-all overflow-hidden">
+        <span className="pl-6 pr-1 py-4 text-stone-400 font-medium shrink-0 pointer-events-none">
+          ourlovenotes.com/
+        </span>
         <input
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
           placeholder="yourname"
-          className="w-full pl-[135px] pr-4 py-4 rounded-full border-2 border-stone-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10 outline-none text-lg font-medium text-stone-900 transition-all"
+          className="w-full py-4 pr-6 bg-transparent outline-none text-lg font-medium text-stone-900"
           disabled={loading}
         />
       </div>
