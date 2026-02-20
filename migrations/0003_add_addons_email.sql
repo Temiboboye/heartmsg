@@ -1,0 +1,1 @@
+ALTER TABLE stories ADD COLUMN addons TEXT; ALTER TABLE stories ADD COLUMN email TEXT;

@@ -1,0 +1,25 @@
+{
+	"name": "heartmsg",
+	"compatibility_date": "2024-04-03",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "heartmsg-db",
+			"database_id": "0f572cdc-dcc0-4b4e-89e7-2621bb358489"
+		},
+		{
+			"binding": "heartmsg_db",
+			"database_name": "heartmsg-db",
+			"database_id": "0f572cdc-dcc0-4b4e-89e7-2621bb358489"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "BUCKET",
+			"bucket_name": "story-images"
+		}
+	]
+}
