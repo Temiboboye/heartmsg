@@ -355,17 +355,19 @@ export default function StoryEditor() {
                             </motion.div>
                         </div>
                         {/* Text Content Area - contenteditable for iOS compat */}
-                        <div className="w-full relative px-4 text-center z-[100] pointer-events-auto mt-4">
+                        <div
+                            className="w-full relative px-4 py-8 -my-8 text-center z-[100] pointer-events-auto min-h-[200px] cursor-text flex flex-col items-center justify-start"
+                            onClick={(e) => { e.stopPropagation(); textEditorRef.current?.focus(); }}
+                            onTouchEnd={(e) => { e.stopPropagation(); textEditorRef.current?.focus(); }}
+                        >
                             <div
                                 ref={textEditorRef}
                                 contentEditable
                                 suppressContentEditableWarning
                                 onInput={handleTextInput}
-                                onTouchEnd={handleTextTouchEnd}
-                                onClick={(e) => { e.stopPropagation(); textEditorRef.current?.focus(); }}
                                 data-placeholder="Type your story..."
                                 className={cn(
-                                    "w-full bg-transparent text-center text-4xl md:text-5xl font-extrabold outline-none leading-[1.3] transition-all duration-300 cursor-text min-h-[2.6em] empty:before:content-[attr(data-placeholder)] empty:before:opacity-10",
+                                    "w-full max-w-full bg-transparent text-center text-4xl md:text-5xl font-extrabold outline-none leading-[1.3] transition-all duration-300 cursor-text min-h-[3em] empty:before:content-[attr(data-placeholder)] empty:before:opacity-10",
                                     currentTheme.textColor,
                                     currentFont
                                 )}
