@@ -54,6 +54,7 @@ export default function StoryEditor() {
 
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const textEditorRef = useRef<HTMLDivElement>(null);
     const currentTheme = THEMES.find(t => t.id === activeTheme) || THEMES[0];
     const currentFontOption = FONTS.find(f => f.id === currentFont) || FONTS[0];
     const currentSlide = slides[currentSlideIndex];
@@ -176,6 +177,26 @@ export default function StoryEditor() {
         const newSlides = [...slides];
         newSlides[currentSlideIndex].content = content;
         setSlides(newSlides);
+    };
+
+    // Sync contenteditable cursor bug when switching slides
+    useEffect(() => {
+        const el = textEditorRef.current;
+        if (!el) return;
+        const current = el.innerText;
+        if (current !== currentSlide.content) {
+            el.innerText = currentSlide.content;
+        }
+    }, [currentSlideIndex]);
+
+    const handleTextInput = (e: React.FormEvent<HTMLDivElement>) => {
+        const text = (e.currentTarget.innerText || '').slice(0, 200);
+        updateSlideContent(text);
+    };
+
+    const handleTextTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        textEditorRef.current?.focus();
     };
 
     const updateSlideImage = (url: string) => {
@@ -333,20 +354,22 @@ export default function StoryEditor() {
                                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
                             </motion.div>
                         </div>
-                        {/* Text Content Area - High Typography Focus */}
+                        {/* Text Content Area - contenteditable for iOS compat */}
                         <div className="w-full relative px-4 text-center z-[100] pointer-events-auto mt-4">
-                            <textarea
-                                value={currentSlide.content}
-                                onChange={(e) => updateSlideContent(e.target.value)}
-                                onClick={(e) => e.stopPropagation()}
-                                placeholder="Type your story..."
+                            <div
+                                ref={textEditorRef}
+                                contentEditable
+                                suppressContentEditableWarning
+                                onInput={handleTextInput}
+                                onTouchEnd={handleTextTouchEnd}
+                                onClick={(e) => { e.stopPropagation(); textEditorRef.current?.focus(); }}
+                                data-placeholder="Type your story..."
                                 className={cn(
-                                    "w-full bg-transparent text-center text-4xl md:text-5xl font-extrabold outline-none resize-none overflow-hidden leading-[1.3] placeholder:text-stone-900/10 transition-all duration-300 cursor-text",
+                                    "w-full bg-transparent text-center text-4xl md:text-5xl font-extrabold outline-none leading-[1.3] transition-all duration-300 cursor-text min-h-[2.6em] empty:before:content-[attr(data-placeholder)] empty:before:opacity-10",
                                     currentTheme.textColor,
                                     currentFont
                                 )}
-                                style={{ WebkitUserSelect: 'text', userSelect: 'text', touchAction: 'manipulation', WebkitTouchCallout: 'default' }}
-                                rows={2}
+                                style={{ WebkitUserSelect: 'text', userSelect: 'text', touchAction: 'manipulation', WebkitTouchCallout: 'default', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}
                                 spellCheck={false}
                             />
 
