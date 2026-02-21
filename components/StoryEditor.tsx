@@ -30,6 +30,12 @@ const FONTS: FontOption[] = [
     { id: 'font-handwritten', name: 'Handwritten', class: 'font-handwritten' },
 ];
 
+const FONT_FAMILY_MAP: Record<FontId, string> = {
+    'font-heading': 'var(--font-outfit), sans-serif',
+    'font-body': 'var(--font-inter), sans-serif',
+    'font-handwritten': 'var(--font-nothing-you-could-do), cursive',
+};
+
 const slideVariants = {
     hidden: { opacity: 0, scale: 0.98, y: 5 },
     visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as any } },
@@ -364,10 +370,18 @@ export default function StoryEditor() {
                                 data-placeholder="Type your story..."
                                 className={cn(
                                     "w-full max-w-full bg-transparent text-center text-4xl md:text-5xl font-extrabold outline-none leading-[1.3] transition-all duration-300 cursor-text min-h-[3em] empty:before:content-[attr(data-placeholder)] empty:before:opacity-10",
-                                    currentTheme.textColor,
-                                    currentFont
+                                    currentTheme.textColor
                                 )}
-                                style={{ WebkitUserSelect: 'text', userSelect: 'text', touchAction: 'manipulation', WebkitTouchCallout: 'default', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}
+                                style={{
+                                    WebkitUserSelect: 'text',
+                                    userSelect: 'text',
+                                    touchAction: 'manipulation',
+                                    WebkitTouchCallout: 'default',
+                                    wordBreak: 'break-word',
+                                    whiteSpace: 'pre-wrap',
+                                    fontFamily: FONT_FAMILY_MAP[currentFont],
+                                    fontWeight: currentFont === 'font-handwritten' ? '400' : '800',
+                                }}
                                 spellCheck={false}
                             />
 
