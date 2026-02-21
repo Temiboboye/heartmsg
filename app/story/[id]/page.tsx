@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { THEMES, ThemeId, FontId, StoryData, SlideData, Theme, MUSIC_TRACKS } from '@/lib/types';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, ChevronLeft, ChevronRight, Share2, Lock, Play, Pause, MessageCircle } from 'lucide-react';
+import { Heart, ChevronLeft, ChevronRight, Share2, Lock, Play, Pause, MessageCircle, Copy, Check } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -26,6 +26,35 @@ export default function StoryViewPage() {
     const [error, setError] = useState<string | null>(null);
     const [musicAutoStarted, setMusicAutoStarted] = useState(false);
     const [showReplyConfirm, setShowReplyConfirm] = useState(false);
+    const [showShareSheet, setShowShareSheet] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const handleShare = () => {
+        const url = window.location.href;
+        const text = '💖 Someone made me a love story — check it out!';
+        setShowShareSheet(s => !s);
+    };
+
+    const shareToWhatsApp = () => {
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent('💖 Someone made me a love story on OurLoveNotes — check it out!');
+        window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+        setShowShareSheet(false);
+    };
+
+    const shareToX = () => {
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent('💖 Someone made me a love story on OurLoveNotes — check it out!');
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+        setShowShareSheet(false);
+    };
+
+    const copyLink = () => {
+        navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        setShowShareSheet(false);
+    };
 
     const [verifying, setVerifying] = useState(false);
 
@@ -270,20 +299,31 @@ export default function StoryViewPage() {
                     </div>
                 </div>
 
-                <button
-                    onClick={() => {
-                        navigator.share?.({
-                            title: 'OurLoveNotes Story',
-                            url: window.location.href
-                        }).catch(() => {
-                            navigator.clipboard.writeText(window.location.href);
-                            alert('Link copied to clipboard!');
-                        });
-                    }}
-                    className="p-3 rounded-full hover:bg-black/5 transition-colors"
-                >
-                    <Share2 size={24} className={currentTheme.textColor} />
-                </button>
+                <div className="relative">
+                    <button
+                        onClick={handleShare}
+                        className="p-3 rounded-full hover:bg-black/5 transition-colors"
+                    >
+                        <Share2 size={24} className={currentTheme.textColor} />
+                    </button>
+                    {showShareSheet && (
+                        <div className="absolute right-0 top-12 z-50 bg-white rounded-2xl shadow-2xl border border-stone-100 p-2 w-52 flex flex-col gap-1 animate-fade-in">
+                            <button onClick={shareToWhatsApp} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left">
+                                <span className="text-xl">💬</span>
+                                <span className="font-bold text-sm text-stone-800">WhatsApp</span>
+                            </button>
+                            <button onClick={shareToX} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-stone-50 transition-colors text-left">
+                                <span className="text-xl font-black text-stone-900">𝕏</span>
+                                <span className="font-bold text-sm text-stone-800">Post on X</span>
+                            </button>
+                            <div className="h-px bg-stone-100 mx-2" />
+                            <button onClick={copyLink} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-stone-50 transition-colors text-left">
+                                {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} className="text-stone-500" />}
+                                <span className="font-bold text-sm text-stone-800">{copied ? 'Copied!' : 'Copy Link'}</span>
+                            </button>
+                        </div>
+                    )}
+                </div>
             </header>
 
             {/* Main Content Area */}
@@ -351,24 +391,35 @@ export default function StoryViewPage() {
             {/* Brand Footer with PLG CTA */}
             <footer className="relative z-60 w-full pb-10 flex flex-col items-center gap-3">
                 <div className="flex flex-col items-center gap-3">
-                    <button
-                        onClick={() => {
-                            navigator.share?.({
-                                title: 'OurLoveNotes Story',
-                                url: window.location.href
-                            }).catch(() => {
-                                navigator.clipboard.writeText(window.location.href);
-                                alert('Link copied!');
-                            });
-                        }}
-                        className={cn(
-                            "px-6 py-3 rounded-full font-bold shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 w-48",
-                            currentTheme.buttonClass
+                    <div className="relative flex flex-col items-center">
+                        <button
+                            onClick={handleShare}
+                            className={cn(
+                                "px-6 py-3 rounded-full font-bold shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 w-48",
+                                currentTheme.buttonClass
+                            )}
+                        >
+                            <Share2 size={16} />
+                            Share this Story
+                        </button>
+                        {showShareSheet && (
+                            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 z-50 bg-white rounded-2xl shadow-2xl border border-stone-100 p-2 w-56 flex flex-col gap-1 animate-fade-in">
+                                <button onClick={shareToWhatsApp} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left">
+                                    <span className="text-xl">💬</span>
+                                    <span className="font-bold text-sm text-stone-800">WhatsApp</span>
+                                </button>
+                                <button onClick={shareToX} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-stone-50 transition-colors text-left">
+                                    <span className="text-xl font-black text-stone-900">𝕏</span>
+                                    <span className="font-bold text-sm text-stone-800">Post on X</span>
+                                </button>
+                                <div className="h-px bg-stone-100 mx-2" />
+                                <button onClick={copyLink} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-stone-50 transition-colors text-left">
+                                    {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} className="text-stone-500" />}
+                                    <span className="font-bold text-sm text-stone-800">{copied ? 'Copied!' : 'Copy Link'}</span>
+                                </button>
+                            </div>
                         )}
-                    >
-                        <Share2 size={16} />
-                        Share this Story
-                    </button>
+                    </div>
                     <button
                         onClick={handleReply}
                         className={cn(

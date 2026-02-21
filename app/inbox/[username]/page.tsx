@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Lock, Settings, Mail, Compass, PlusCircle, User, Share2, Sparkles, Loader2 } from 'lucide-react';
+import { Heart, Lock, Settings, Mail, Compass, PlusCircle, User, Share2, Sparkles, Loader2, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -22,6 +22,8 @@ export default function InboxPage() {
     const [error, setError] = useState('');
     const [selectedReplyMessage, setSelectedReplyMessage] = useState<InboxMessageData | null>(null);
     const [walletCoins, setWalletCoins] = useState<number | null>(null);
+    const [showShareSheet, setShowShareSheet] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     useEffect(() => {
         if (!username) return;
@@ -55,17 +57,27 @@ export default function InboxPage() {
             .catch(() => { });
     }, [username]);
 
-    const handleShare = () => {
-        const url = `${window.location.origin}/send/${username}`;
-        if (navigator.share) {
-            navigator.share({ title: 'Send me an anonymous note', url }).catch(() => {
-                navigator.clipboard.writeText(url);
-                alert('Sent link copied to clipboard!');
-            });
-        } else {
-            navigator.clipboard.writeText(url);
-            alert('Sent link copied to clipboard!');
-        }
+    const handleShare = () => setShowShareSheet(s => !s);
+
+    const shareToWhatsApp = () => {
+        const url = encodeURIComponent(`${window.location.origin}/send/${username}`);
+        const text = encodeURIComponent(`💌 Send me an anonymous love note on OurLoveNotes!`);
+        window.open(`https://wa.me/?text=${text}%20${url}`, '_blank');
+        setShowShareSheet(false);
+    };
+
+    const shareToX = () => {
+        const url = encodeURIComponent(`${window.location.origin}/send/${username}`);
+        const text = encodeURIComponent(`💌 Send me an anonymous love note on OurLoveNotes!`);
+        window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+        setShowShareSheet(false);
+    };
+
+    const copyLink = () => {
+        navigator.clipboard.writeText(`${window.location.origin}/send/${username}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        setShowShareSheet(false);
     };
 
     if (loading) {
@@ -139,12 +151,31 @@ export default function InboxPage() {
                     </div>
                     <span className="text-sm font-medium text-brand-muted mb-3">@{inbox.username}</span>
 
-                    <button
-                        onClick={handleShare}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-white/60 hover:bg-white backdrop-blur-md border border-white/40 rounded-full text-brand-rose text-sm font-bold shadow-sm transition-all hover:scale-105 active:scale-95"
-                    >
-                        <Share2 size={14} strokeWidth={3} /> Share on Socials
-                    </button>
+                    <div className="relative flex flex-col items-center">
+                        <button
+                            onClick={handleShare}
+                            className="flex items-center gap-2 px-4 py-1.5 bg-white/60 hover:bg-white backdrop-blur-md border border-white/40 rounded-full text-brand-rose text-sm font-bold shadow-sm transition-all hover:scale-105 active:scale-95"
+                        >
+                            <Share2 size={14} strokeWidth={3} /> Share on Socials
+                        </button>
+                        {showShareSheet && (
+                            <div className="absolute top-10 z-50 bg-white rounded-2xl shadow-2xl border border-stone-100 p-2 w-52 flex flex-col gap-1">
+                                <button onClick={shareToWhatsApp} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-green-50 transition-colors text-left">
+                                    <span className="text-xl">💬</span>
+                                    <span className="font-bold text-sm text-stone-800">WhatsApp</span>
+                                </button>
+                                <button onClick={shareToX} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-stone-50 transition-colors text-left">
+                                    <span className="text-xl font-black text-stone-900">𝕏</span>
+                                    <span className="font-bold text-sm text-stone-800">Post on X</span>
+                                </button>
+                                <div className="h-px bg-stone-100 mx-2" />
+                                <button onClick={copyLink} className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-stone-50 transition-colors text-left">
+                                    {copied ? <Check size={18} className="text-green-500" /> : <Copy size={18} className="text-stone-500" />}
+                                    <span className="font-bold text-sm text-stone-800">{copied ? 'Copied!' : 'Copy Link'}</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
                     <button className="absolute right-6 top-8 p-2 rounded-full bg-white/50 text-brand-muted hover:bg-white/80 hover:text-brand-dark transition-colors">
                         <Settings size={20} />
