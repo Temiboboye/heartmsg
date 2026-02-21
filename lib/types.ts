@@ -104,12 +104,12 @@ export interface MusicTrack {
 }
 
 export const MUSIC_TRACKS: MusicTrack[] = [
-    { id: 'piano', name: 'Gentle Piano', src: '/music/piano.mp3' },
-    { id: 'guitar', name: 'Acoustic Love', src: '/music/guitar.mp3' },
-    { id: 'synth', name: 'Dreamy Synth', src: '/music/synth.mp3' },
-    { id: 'lofi', name: 'Lo-Fi Chill', src: '/music/piano.mp3' }, // Placeholder reuse
-    { id: 'orchestral', name: 'Cinematic', src: '/music/synth.mp3' }, // Placeholder reuse
-    { id: 'jazz', name: 'Smooth Jazz', src: '/music/guitar.mp3' }, // Placeholder reuse
+    { id: 'piano', name: '🎹 Gentle Piano', src: '/music/piano.mp3' },
+    { id: 'guitar', name: '🎸 Acoustic Love', src: '/music/guitar.mp3' },
+    { id: 'synth', name: '✨ Dreamy Synth', src: '/music/synth.mp3' },
+    { id: 'lofi', name: '☁️ Lo-Fi Romance', src: '/music/lofi.mp3' },
+    { id: 'orchestral', name: '🎻 Cinematic Strings', src: '/music/orchestral.mp3' },
+    { id: 'jazz', name: '🎷 Smooth Jazz', src: '/music/jazz.mp3' },
 ];
 
 export type AddonId = 'no-watermark' | 'elegant-font' | 'romantic-music' | 'effects' | 'custom-link' | 'confetti';
