@@ -1,13 +1,15 @@
 /**
  * Coin (Hearts) calculation utilities
+ * Platform takes 70% cut — creator earns 30%
  * 100 Hearts = $1 / ₦1,000
- * Platform keeps 30%, creator earns 70% → 50 Hearts base + 10 per add-on
+ * Base $1 note → creator earns 30% = $0.30 → 30 Hearts
+ * Each $0.50 add-on → creator earns 30% = $0.15 → 15 Hearts
  */
 
-export const COINS_BASE = 50; // Hearts for a base premium note
-export const COINS_PER_ADDON = 10; // Hearts per add-on selected
-export const COINS_PER_DOLLAR = 100; // Exchange rate
-export const MIN_WITHDRAWAL_COINS = 500; // Minimum 500 Hearts to withdraw
+export const COINS_BASE = 30; // Hearts for a base premium note (30% of $1)
+export const COINS_PER_ADDON = 15; // Hearts per add-on (30% of $0.50)
+export const COINS_PER_DOLLAR = 100; // Exchange rate: 100 Hearts = $1
+export const MIN_WITHDRAWAL_COINS = 500; // Minimum 500 Hearts ($5) to withdraw
 
 /**
  * Calculate how many Hearts to credit for a completed payment.
