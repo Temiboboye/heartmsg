@@ -221,9 +221,9 @@ export default function SendPage() {
                                 <motion.button
                                     onClick={() => setIsCheckoutOpen(true)}
                                     disabled={isSending || !content.trim()}
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-rose to-[#ff6b8b] py-3 text-white shadow-md shadow-brand-rose/25 transition-all font-heading font-bold text-lg tracking-wide disabled:opacity-50"
+                                    whileHover={{ scale: content.trim() ? 1.02 : 1 }}
+                                    whileTap={{ scale: content.trim() ? 0.98 : 1 }}
+                                    className={`w-full flex items-center justify-center gap-2 rounded-2xl py-4 text-white shadow-md transition-all font-heading font-bold text-lg tracking-wide ${content.trim() ? 'bg-gradient-to-r from-brand-rose to-[#ff6b8b] shadow-brand-rose/25 cursor-pointer' : 'bg-stone-300 cursor-not-allowed'}`}
                                 >
                                     <Sparkles size={18} />
                                     <span>Send Love Note</span>
