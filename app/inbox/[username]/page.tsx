@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { InboxData, InboxMessageData } from '@/lib/types';
 import ReplyModal from '@/components/reply-modal';
+import { MIN_WITHDRAWAL_COINS } from '@/lib/coins';
 
 export const runtime = 'edge';
 
@@ -20,6 +21,7 @@ export default function InboxPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedReplyMessage, setSelectedReplyMessage] = useState<InboxMessageData | null>(null);
+    const [walletCoins, setWalletCoins] = useState<number | null>(null);
 
     useEffect(() => {
         if (!username) return;
@@ -45,6 +47,12 @@ export default function InboxPage() {
         };
 
         fetchInbox();
+
+        // Fetch wallet balance
+        fetch(`/api/wallet/${username}`)
+            .then(r => r.json())
+            .then((d: any) => { if (d.wallet) setWalletCoins(d.wallet.coins); })
+            .catch(() => { });
     }, [username]);
 
     const handleShare = () => {
@@ -141,6 +149,15 @@ export default function InboxPage() {
                     <button className="absolute right-6 top-8 p-2 rounded-full bg-white/50 text-brand-muted hover:bg-white/80 hover:text-brand-dark transition-colors">
                         <Settings size={20} />
                     </button>
+
+                    {/* Hearts Wallet Teaser */}
+                    {walletCoins !== null && (
+                        <Link href={`/inbox/${username}/wallet`} className="mt-3 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-full text-sm font-bold shadow-md shadow-rose-500/25 hover:scale-105 transition-transform active:scale-95">
+                            <Heart size={14} fill="white" />
+                            <span>{walletCoins.toLocaleString()} Hearts</span>
+                            {walletCoins >= MIN_WITHDRAWAL_COINS && <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">Withdraw →</span>}
+                        </Link>
+                    )}
                 </div>
 
                 {/* Messages List Area */}

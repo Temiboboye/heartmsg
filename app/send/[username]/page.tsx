@@ -80,8 +80,23 @@ export default function SendPage() {
                 // Redirect to Stripe
                 window.location.href = checkoutSession.url;
             } else {
-                alert('Paystack for inbox messages is coming soon. Please use USD.');
-                setIsSending(false);
+                // Paystack (NGN)
+                const checkoutRes = await fetch('/api/inbox-checkout/paystack', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messageId: msgData.messageId,
+                        addons: checkoutData.addons,
+                        email: checkoutData.email,
+                        username: inbox.username
+                    })
+                });
+                const checkoutSession = await checkoutRes.json() as { url?: string, error?: string };
+                if (!checkoutRes.ok || !checkoutSession.url) {
+                    throw new Error(checkoutSession.error || 'Failed to initialize Paystack checkout');
+                }
+                // Redirect to Paystack
+                window.location.href = checkoutSession.url;
             }
 
         } catch (e: any) {
