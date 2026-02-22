@@ -423,11 +423,11 @@ export default function StoryViewPage() {
                     <button
                         onClick={handleReply}
                         className={cn(
-                            "px-6 py-3 rounded-full font-bold shadow transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 w-48",
+                            "px-6 py-3 rounded-full font-bold shadow transition-all hover:scale-105 active:scale-95 flex items-center justify-center gap-2 w-48 text-black",
                             currentTheme.glassClass
                         )}
                     >
-                        <MessageCircle size={16} className="fill-current" />
+                        <MessageCircle size={16} className="fill-current text-black" />
                         Send a Reply ❤️
                     </button>
                     <button
