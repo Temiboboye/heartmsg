@@ -292,7 +292,7 @@ export default function InboxPage() {
                                 className="w-full flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-brand-rose to-[#ff6b8b] py-3.5 text-white shadow-xl shadow-brand-rose/30 transition-all font-heading font-bold text-lg tracking-wide hover:shadow-brand-rose/40"
                             >
                                 <Heart size={20} className="fill-white stroke-none" />
-                                <span>Reach out to someone</span>
+                                <span>Send {inbox?.username || username} your love</span>
                             </motion.button>
                         </Link>
 
