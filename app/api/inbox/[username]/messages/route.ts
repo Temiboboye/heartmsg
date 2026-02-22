@@ -44,20 +44,25 @@ export async function POST(
         }
 
         const messageId = crypto.randomUUID();
+        const isPremium = body.is_premium ? 1 : 0;
+        // Free messages are immediately visible (is_paid=1)
+        // Premium messages wait for payment webhook to set is_paid=1
+        const isPaid = isPremium ? 0 : 1;
 
         // 3. Insert the message
         await DB.prepare(`
-            INSERT INTO inbox_messages (id, inbox_id, sender_name, content, is_premium, addons, payment_reference)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO inbox_messages (id, inbox_id, sender_name, content, is_premium, addons, payment_reference, is_paid)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `)
             .bind(
                 messageId,
                 inbox.id,
                 body.sender_name || 'Anonymous',
                 body.content,
-                body.is_premium ? 1 : 0,
+                isPremium,
                 JSON.stringify(body.addons || []),
-                body.payment_reference || null
+                body.payment_reference || null,
+                isPaid
             )
             .run();
 
