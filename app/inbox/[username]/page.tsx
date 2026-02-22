@@ -3,7 +3,7 @@
 import { Heart, Lock, Settings, Mail, Compass, PlusCircle, User, Share2, Sparkles, Loader2, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { InboxData, InboxMessageData } from '@/lib/types';
 import ReplyModal from '@/components/reply-modal';
@@ -15,6 +15,7 @@ export default function InboxPage() {
     const params = useParams();
     const router = useRouter();
     const username = params.username as string;
+    const searchParams = useSearchParams();
 
     const [inbox, setInbox] = useState<InboxData | null>(null);
     const [messages, setMessages] = useState<InboxMessageData[]>([]);
@@ -56,6 +57,38 @@ export default function InboxPage() {
             .then((d: any) => { if (d.wallet) setWalletCoins(d.wallet.coins); })
             .catch(() => { });
     }, [username]);
+
+    // Verify Paystack Payments
+    useEffect(() => {
+        const verifyPaystack = async () => {
+            const isPaystackSuccess = searchParams.get('paystack_success');
+            const reference = searchParams.get('reference');
+
+            if (isPaystackSuccess === 'true' && reference) {
+                try {
+                    const res = await fetch('/api/verify-payment/paystack', {
+                        method: 'POST',
+                        body: JSON.stringify({ reference }),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await res.json() as { success: boolean };
+                    if (data.success) {
+                        // Cleanup URL so we don't verify again on refresh
+                        router.replace(`/inbox/${username}`);
+
+                        // Reload data to reflect the new message and coins
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 500);
+                    }
+                } catch (e) {
+                    console.error("Error verifying payment", e);
+                }
+            }
+        };
+
+        verifyPaystack();
+    }, [searchParams, username, router]);
 
     const handleShare = () => setShowShareSheet(s => !s);
 
