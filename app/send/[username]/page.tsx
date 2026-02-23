@@ -25,6 +25,14 @@ export default function SendPage() {
 
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
     const [sendSuccess, setSendSuccess] = useState(false);
+    const [isEventMode, setIsEventMode] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            setIsEventMode(params.get('mode') === 'event');
+        }
+    }, []);
 
     useEffect(() => {
         if (!username) return;
@@ -102,6 +110,31 @@ export default function SendPage() {
 
         } catch (e: any) {
             alert(e.message);
+            setIsSending(false);
+        }
+    };
+
+    const handleFreeMessage = async () => {
+        if (!content.trim() || !inbox) return;
+        setIsSending(true);
+        try {
+            const msgRes = await fetch(`/api/inbox/${inbox.username}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: content.trim(),
+                    sender_name: senderName.trim(),
+                    is_premium: false,
+                    addons: []
+                })
+            });
+            const msgData = await msgRes.json() as { error?: string, messageId?: string };
+            if (!msgRes.ok || !msgData.messageId) throw new Error(msgData.error || 'Failed to send message');
+
+            setSendSuccess(true);
+        } catch (e: any) {
+            alert(e.message);
+        } finally {
             setIsSending(false);
         }
     };
@@ -262,14 +295,14 @@ export default function SendPage() {
 
                             <div className="flex flex-col w-full gap-3 mt-2">
                                 <motion.button
-                                    onClick={() => setIsCheckoutOpen(true)}
+                                    onClick={isEventMode ? handleFreeMessage : () => setIsCheckoutOpen(true)}
                                     disabled={isSending || !content.trim()}
                                     whileHover={{ scale: content.trim() ? 1.02 : 1 }}
                                     whileTap={{ scale: content.trim() ? 0.98 : 1 }}
                                     className={`w-full flex items-center justify-center gap-2 rounded-2xl py-4 text-white shadow-md transition-all font-heading font-bold text-lg tracking-wide ${content.trim() ? 'bg-gradient-to-r from-brand-rose to-[#ff6b8b] shadow-brand-rose/25 cursor-pointer' : 'bg-stone-300 cursor-not-allowed'}`}
                                 >
-                                    <Sparkles size={18} />
-                                    <span>Send Love Note</span>
+                                    {isSending ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+                                    <span>{isEventMode ? 'Send Anonymous Note' : 'Send Love Note'}</span>
                                 </motion.button>
                             </div>
                         </motion.div>
