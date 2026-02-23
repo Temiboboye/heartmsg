@@ -3,100 +3,71 @@
 import { useState, useEffect } from 'react';
 import { Bell, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import OneSignal from 'react-onesignal';
 
 export default function PushPrompt({ inboxId, username }: { inboxId: string, username: string }) {
-    const [isSupported, setIsSupported] = useState(false);
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showPrompt, setShowPrompt] = useState(false);
 
     useEffect(() => {
-        // Check if push is supported and sw is registered
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
-            setIsSupported(true);
+        const initOneSignal = async () => {
+            const appId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID;
+            if (!appId) return;
 
-            // Check current subscription status
-            navigator.serviceWorker.register('/sw.js').then(registration => {
-                registration.pushManager.getSubscription().then(subscription => {
-                    if (subscription) {
-                        setIsSubscribed(true);
-                    } else {
-                        // Only show prompt if they haven't subscribed yet
-                        // Wait a few seconds before popping it up to not overwhelm them
-                        setTimeout(() => setShowPrompt(true), 3000);
-                    }
-                });
-            });
+            try {
+                // Check if already sliding down or initialized
+                if (!window.OneSignal) {
+                    await OneSignal.init({
+                        appId: appId,
+                        allowLocalhostAsSecureOrigin: true
+                    });
+                }
+
+                const hasOptedIn = OneSignal.User.PushSubscription.optedIn;
+
+                if (hasOptedIn) {
+                    setIsSubscribed(true);
+                    // Ensure the user is logged in with this inbox's username so we can target them
+                    OneSignal.login(username);
+                } else {
+                    // Show our custom prompt slightly delayed
+                    setTimeout(() => setShowPrompt(true), 3000);
+                }
+            } catch (e) {
+                console.error("OneSignal initialization failed", e);
+            }
+        };
+
+        if (typeof window !== 'undefined') {
+            initOneSignal();
         }
     }, [username]);
-
-    // Convert VAPID key
-    const urlBase64ToUint8Array = (base64String: string) => {
-        const padding = '='.repeat((4 - base64String.length % 4) % 4);
-        const base64 = (base64String + padding)
-            .replace(/\-/g, '+')
-            .replace(/_/g, '/');
-
-        const rawData = window.atob(base64);
-        const outputArray = new Uint8Array(rawData.length);
-
-        for (let i = 0; i < rawData.length; ++i) {
-            outputArray[i] = rawData.charCodeAt(i);
-        }
-        return outputArray;
-    }
 
     const handleSubscribe = async () => {
         setIsLoading(true);
         try {
-            const registration = await navigator.serviceWorker.ready;
+            await OneSignal.Slidedown.promptPush();
 
-            // Re-check permission just in case
-            if (Notification.permission === 'denied') {
-                alert('You have blocked notifications. Please enable them in your browser settings.');
-                setIsLoading(false);
-                setShowPrompt(false);
-                return;
-            }
-
-            const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-
-            if (!publicVapidKey) {
-                console.error("Missing VAPID public key");
-                setIsLoading(false);
-                return;
-            }
-
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-            });
-
-            // Send to our backend
-            const res = await fetch('/api/notifications/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    inboxId,
-                    subscription
-                })
-            });
-
-            if (res.ok) {
+            // Re-check permission after prompt
+            const hasOptedIn = OneSignal.User.PushSubscription.optedIn;
+            if (hasOptedIn) {
                 setIsSubscribed(true);
                 setShowPrompt(false);
+                // "Login" the user to this external ID (their username)
+                // so we can target them by username from the backend REST API
+                await OneSignal.login(username);
             } else {
-                console.error('Failed to save subscription');
+                setShowPrompt(false);
             }
         } catch (error) {
-            // User likely denied permission
             console.error('Error subscribing to push:', error);
             setShowPrompt(false);
         }
         setIsLoading(false);
     };
 
-    if (!isSupported || isSubscribed) return null;
+    if (isSubscribed) return null;
 
     return (
         <AnimatePresence>
@@ -105,7 +76,7 @@ export default function PushPrompt({ inboxId, username }: { inboxId: string, use
                     initial={{ opacity: 0, y: 50, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    className="fixed bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-96 bg-white/90 backdrop-blur-xl border border-brand-rose/20 rounded-3xl p-5 shadow-2xl flex flex-col gap-3 z-50"
+                    className="fixed bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-96 bg-white/90 backdrop-blur-xl border border-brand-rose/20 rounded-3xl p-5 shadow-2xl flex flex-col gap-3 z-50 pointer-events-auto"
                 >
                     <button
                         onClick={() => setShowPrompt(false)}

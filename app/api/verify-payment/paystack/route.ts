@@ -79,27 +79,20 @@ export async function POST(request: NextRequest) {
                     // Trigger Push Notification for Premium Note
                     (async () => {
                         try {
-                            const subs = await env.DB.prepare('SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE inbox_id = ?')
-                                .bind(msg.inbox_id)
-                                .all<{ endpoint: string, p256dh: string, auth: string }>();
+                            // We need the username for the URL and OneSignal external_id targeting
+                            const inbox = await env.DB.prepare('SELECT username FROM inboxes WHERE id = ?')
+                                .bind(msg.inbox_id).first<{ username: string }>();
 
-                            if (subs.results && subs.results.length > 0) {
-                                // We need the username for the URL
-                                const inbox = await env.DB.prepare('SELECT username FROM inboxes WHERE id = ?')
-                                    .bind(msg.inbox_id).first<{ username: string }>();
-
-                                if (inbox) {
-                                    for (const sub of subs.results) {
-                                        await sendPushNotification({
-                                            endpoint: sub.endpoint,
-                                            keys: { p256dh: sub.p256dh, auth: sub.auth }
-                                        }, {
-                                            title: 'Premium Love Note! 💎',
-                                            body: `Someone just sent you a premium note. You earned ${coins} Hearts!`,
-                                            url: `/inbox/${inbox.username}`
-                                        }, env);
-                                    }
-                                }
+                            if (inbox) {
+                                await sendPushNotification(
+                                    inbox.username,
+                                    {
+                                        title: 'Premium Love Note! 💎',
+                                        body: `Someone just sent you a premium note. You earned ${coins} Hearts!`,
+                                        url: `/inbox/${inbox.username}`
+                                    },
+                                    env
+                                );
                             }
                         } catch (e) {
                             console.error("Failed to send premium push notification:", e);

@@ -6,4 +6,6 @@ interface CloudflareEnv {
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: string;
     PAYSTACK_SECRET_KEY: string;
     NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: string;
+    NEXT_PUBLIC_ONESIGNAL_APP_ID?: string;
+    ONESIGNAL_REST_API_KEY?: string;
 }

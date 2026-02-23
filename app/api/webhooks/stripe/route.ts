@@ -60,26 +60,19 @@ async function creditCoinsForMessage(env: CloudflareEnv, messageId: string, addo
     // Trigger Push Notification for Premium Note
     (async () => {
         try {
-            const subs = await env.DB.prepare('SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE inbox_id = ?')
-                .bind(msg.inbox_id)
-                .all<{ endpoint: string, p256dh: string, auth: string }>();
+            const inboxRow = await env.DB.prepare('SELECT username FROM inboxes WHERE id = ?')
+                .bind(msg.inbox_id).first<{ username: string }>();
 
-            if (subs.results && subs.results.length > 0) {
-                const inboxRow = await env.DB.prepare('SELECT username FROM inboxes WHERE id = ?')
-                    .bind(msg.inbox_id).first<{ username: string }>();
-
-                if (inboxRow) {
-                    for (const sub of subs.results) {
-                        await sendPushNotification({
-                            endpoint: sub.endpoint,
-                            keys: { p256dh: sub.p256dh, auth: sub.auth }
-                        }, {
-                            title: 'Premium Love Note! 💎',
-                            body: `Someone just sent you a premium note. You earned ${coins} Hearts!`,
-                            url: `/inbox/${inboxRow.username}`
-                        }, env);
-                    }
-                }
+            if (inboxRow) {
+                await sendPushNotification(
+                    inboxRow.username,
+                    {
+                        title: 'Premium Love Note! 💎',
+                        body: `Someone just sent you a premium note. You earned ${coins} Hearts!`,
+                        url: `/inbox/${inboxRow.username}`
+                    },
+                    env
+                );
             }
         } catch (e) {
             console.error("Failed to send premium push notification:", e);
