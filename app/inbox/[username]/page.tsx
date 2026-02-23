@@ -189,7 +189,12 @@ export default function InboxPage() {
                                 ) : null}
                             </h1>
                         </div>
-                        <span className="text-sm font-medium text-brand-muted">@{inbox.username}</span>
+                        <Link
+                            href={`/send/${inbox.username}`}
+                            className="text-sm font-medium text-brand-muted hover:text-brand-rose hover:underline transition-colors title='Send a message'"
+                        >
+                            @{inbox.username}
+                        </Link>
 
                         {/* Level Badge */}
                         {inbox.total_earned !== undefined && (
@@ -310,16 +315,21 @@ export default function InboxPage() {
 
                     {/* Buttons wrapper (pointer events auto) */}
                     <div className="w-full bg-brand-bg pb-6 pt-2 pointer-events-auto flex flex-col items-center gap-5">
-                        {/* Floating "Reach out" Button */}
-                        <Link href="/create" className="w-full">
+                        {/* Floating "Send Message" Button */}
+                        <Link href={`/send/${inbox.username}`} className="w-full">
                             <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.95 }}
                                 className="w-full flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-brand-rose to-[#ff6b8b] py-3.5 text-white shadow-xl shadow-brand-rose/30 transition-all font-heading font-bold text-lg tracking-wide hover:shadow-brand-rose/40"
                             >
                                 <Heart size={20} className="fill-white stroke-none" />
-                                <span>Send {inbox?.username || username} your love</span>
+                                <span>Send {inbox.username} your love</span>
                             </motion.button>
+                        </Link>
+
+                        {/* Secondary Create Inbox Option */}
+                        <Link href="/" className="text-sm font-bold text-brand-muted opacity-80 hover:opacity-100 hover:text-brand-dark transition-all">
+                            Or create your own inbox
                         </Link>
 
                         {/* Bottom Navigation */}
