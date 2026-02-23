@@ -9,6 +9,7 @@ import { InboxData, InboxMessageData } from '@/lib/types';
 import ReplyModal from '@/components/reply-modal';
 import { MIN_WITHDRAWAL_COINS } from '@/lib/coins';
 import { getCreatorLevel } from '@/lib/levels';
+import PushPrompt from '@/components/push-prompt';
 
 export const runtime = 'edge';
 
@@ -142,6 +143,8 @@ export default function InboxPage() {
                 <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-brand-rose/10 rounded-full blur-3xl animate-pulse-slow animate-delay-200"></div>
                 <div className="absolute top-[40%] left-[20%] w-[300px] h-[300px] bg-white/40 rounded-full blur-3xl"></div>
             </div>
+
+            <PushPrompt inboxId={inbox.id} username={inbox.username} />
 
             {/* Custom Styles */}
             <style jsx global>{`

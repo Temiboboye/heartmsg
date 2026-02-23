@@ -2,6 +2,7 @@ import { getRequestContext } from '@cloudflare/next-on-pages';
 import { NextRequest, NextResponse } from 'next/server';
 import { AddonId } from '@/lib/types';
 import { checkRateLimit } from '@/lib/rate-limit';
+import { sendPushNotification } from '@/lib/push';
 
 export const runtime = 'edge';
 
@@ -65,6 +66,33 @@ export async function POST(
                 isPaid
             )
             .run();
+
+        // If it's a free message, trigger push notifications immediately
+        if (!isPremium) {
+            // Run push notifications in the background so we don't block the response
+            (async () => {
+                try {
+                    const subs = await DB.prepare('SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE inbox_id = ?')
+                        .bind(inbox.id)
+                        .all<{ endpoint: string, p256dh: string, auth: string }>();
+
+                    if (subs.results && subs.results.length > 0) {
+                        for (const sub of subs.results) {
+                            await sendPushNotification({
+                                endpoint: sub.endpoint,
+                                keys: { p256dh: sub.p256dh, auth: sub.auth }
+                            }, {
+                                title: 'New Love Note! 💌',
+                                body: 'Someone just sent you an anonymous message. Open your inbox to read it!',
+                                url: `/inbox/${cleanUsername}`
+                            }, getRequestContext().env as unknown as CloudflareEnv);
+                        }
+                    }
+                } catch (e) {
+                    console.error("Failed to send push notification:", e);
+                }
+            })();
+        }
 
         return NextResponse.json({ success: true, messageId });
 

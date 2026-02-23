@@ -38,6 +38,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#ff477e" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body
         className={`${outfit.variable} ${inter.variable} ${nothingYouCouldDo.variable} ${playfair.variable} antialiased bg-stone-50 text-stone-900 selection:bg-pink-200 selection:text-pink-900 h-full`}
       >

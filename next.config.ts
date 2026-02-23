@@ -6,6 +6,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['web-push'],
   /* config options here */
   eslint: {
     ignoreDuringBuilds: true,
