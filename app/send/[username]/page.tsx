@@ -1,12 +1,13 @@
 "use client";
 
-import { X, MoreHorizontal, Lock, Send, Heart, Sparkles, Loader2, Check } from 'lucide-react';
+import { X, MoreHorizontal, Lock, Send, Heart, Sparkles, Loader2, Check, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { InboxData } from '@/lib/types';
 import InboxCheckoutModal from '@/components/inbox-checkout-modal';
+import { getCreatorLevel } from '@/lib/levels';
 
 export const runtime = 'edge';
 
@@ -199,11 +200,38 @@ export default function SendPage() {
                             </div>
 
                             <div className="flex flex-col items-center gap-5 w-full mt-2">
-                                <div className="text-center space-y-1">
+                                <div className="text-center space-y-3">
                                     <p className="text-brand-rose font-heading font-bold text-xs tracking-[0.2em] uppercase">Send a note</p>
-                                    <h1 className="text-3xl font-serif font-bold text-brand-dark leading-tight break-all">
-                                        Leave a little love for<br />{inbox.username}
-                                    </h1>
+
+                                    <div className="flex flex-col items-center gap-2">
+                                        <h1 className="text-3xl font-serif font-bold text-brand-dark leading-tight break-all flex items-center justify-center gap-2 flex-wrap">
+                                            <span>Leave a little love for</span>
+                                            <span className="flex items-center gap-1.5">
+                                                {inbox.username}
+                                                {inbox.total_earned !== undefined && getCreatorLevel(inbox.total_earned).level.includes('Gold') || inbox.total_earned !== undefined && getCreatorLevel(inbox.total_earned).level.includes('Diamond') ? (
+                                                    <CheckCircle2 size={24} className="text-blue-500 fill-blue-50" />
+                                                ) : null}
+                                            </span>
+                                        </h1>
+
+                                        {/* Level Badge */}
+                                        {inbox.total_earned !== undefined && (
+                                            <div className={`mt-1 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/60 border border-white/40 shadow-sm w-fit mx-auto`}>
+                                                {(() => {
+                                                    const level = getCreatorLevel(inbox.total_earned);
+                                                    const Icon = level.icon;
+                                                    return (
+                                                        <>
+                                                            <Icon size={14} className={level.textClass} />
+                                                            <span className={`text-[11px] font-bold uppercase tracking-wider ${level.textClass}`}>
+                                                                {level.level}
+                                                            </span>
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Lock, Settings, Mail, Compass, PlusCircle, User, Share2, Sparkles, Loader2, Copy, Check } from 'lucide-react';
+import { Heart, Lock, Settings, Mail, Compass, PlusCircle, User, Share2, Sparkles, Loader2, Copy, Check, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { InboxData, InboxMessageData } from '@/lib/types';
 import ReplyModal from '@/components/reply-modal';
 import { MIN_WITHDRAWAL_COINS } from '@/lib/coins';
+import { getCreatorLevel } from '@/lib/levels';
 
 export const runtime = 'edge';
 
@@ -178,11 +179,36 @@ export default function InboxPage() {
 
                 {/* Header Area */}
                 <div className="pt-10 pb-6 flex flex-col items-center justify-center relative w-full">
-                    <div className="flex items-center gap-2 mb-1">
-                        <Heart size={20} className="text-brand-rose fill-brand-rose animate-pulse-slow" />
-                        <h1 className="font-serif text-3xl font-bold tracking-tight text-brand-dark">Your Inbox</h1>
+                    <div className="flex flex-col items-center gap-1 mb-3">
+                        <div className="flex items-center gap-2">
+                            <Heart size={20} className="text-brand-rose fill-brand-rose animate-pulse-slow" />
+                            <h1 className="font-serif text-3xl font-bold tracking-tight text-brand-dark flex items-center gap-2">
+                                Your Inbox
+                                {inbox.total_earned !== undefined && getCreatorLevel(inbox.total_earned).level.includes('Gold') || inbox.total_earned !== undefined && getCreatorLevel(inbox.total_earned).level.includes('Diamond') ? (
+                                    <CheckCircle2 size={24} className="text-blue-500 fill-blue-50" />
+                                ) : null}
+                            </h1>
+                        </div>
+                        <span className="text-sm font-medium text-brand-muted">@{inbox.username}</span>
+
+                        {/* Level Badge */}
+                        {inbox.total_earned !== undefined && (
+                            <div className={`mt-1 flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/60 border border-white/40 shadow-sm`}>
+                                {(() => {
+                                    const level = getCreatorLevel(inbox.total_earned);
+                                    const Icon = level.icon;
+                                    return (
+                                        <>
+                                            <Icon size={14} className={level.textClass} />
+                                            <span className={`text-[11px] font-bold uppercase tracking-wider ${level.textClass}`}>
+                                                {level.level}
+                                            </span>
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                        )}
                     </div>
-                    <span className="text-sm font-medium text-brand-muted mb-3">@{inbox.username}</span>
 
                     <div className="relative flex flex-col items-center">
                         <button

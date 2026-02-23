@@ -133,6 +133,7 @@ export interface InboxData {
     id: string;
     username: string;
     created_at?: string;
+    total_earned?: number;
 }
 
 export interface InboxMessageData {
